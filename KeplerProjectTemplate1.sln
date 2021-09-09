@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31321.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeplerProjectTemplate1.Services", "KeplerProjectTemplate1\KeplerProjectTemplate1.Services\KeplerProjectTemplate1.Services.csproj", "{560CC07B-1F31-481D-B162-B098F61B8E14}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeplerProjectTemplate1.Interfaces", "KeplerProjectTemplate1\KeplerProjectTemplate1.Interfaces\KeplerProjectTemplate1.Interfaces.csproj", "{46BEA14F-5610-4258-8E5C-F3202B4BDADA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{560CC07B-1F31-481D-B162-B098F61B8E14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{560CC07B-1F31-481D-B162-B098F61B8E14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{560CC07B-1F31-481D-B162-B098F61B8E14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{560CC07B-1F31-481D-B162-B098F61B8E14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46BEA14F-5610-4258-8E5C-F3202B4BDADA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46BEA14F-5610-4258-8E5C-F3202B4BDADA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46BEA14F-5610-4258-8E5C-F3202B4BDADA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46BEA14F-5610-4258-8E5C-F3202B4BDADA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F7A0EF09-EAE4-4E3A-8172-AB48DE5774AC}
+	EndGlobalSection
+EndGlobal
