@@ -6,7 +6,8 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
     /// LegilityTest Module Interface.
     /// </summary>
     [ServiceModule("LegilityTest Module")]
-    [RoutePrefix("LegilityTest", VersioningStrategy.Namespace)]
+    [RoutePrefix("LegilityTest")]
+    //[RoutePrefix("LegilityTest", VersioningStrategy.Namespace)]
     public interface ILegilityTestModule
     {
     }

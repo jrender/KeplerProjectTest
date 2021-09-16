@@ -4,8 +4,9 @@ using Relativity.Environment.V1.LibraryApplication.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Relativity.Audit.Services.Interfaces.V1.Metrics.Models;
 
-namespace KeplerProjectTemplate1.Interfaces.LegilityTest.v1
+namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 {
     /// <summary>
     /// MyService Service Interface.
@@ -49,10 +50,14 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest.v1
 
         [HttpGet]
         [Route("application")]
-        Task<ServiceResponse<List<LibraryApplicationResponse>>> GetApplications();
+        Task<ServiceResponse<List<string>>> GetApplications();
 
         [HttpGet]
-        [Route("application/{appGuid:Guid}")]
-        Task<ServiceResponse<LibraryApplicationResponse>> GetApplication(Guid appGuid);
+        [Route("audit/{workspaceID:int}")]
+        Task<ServiceResponse<List<AuditMetricsAggregateResponse>>> GetAuditsForWorkspace(int workspaceID);
+
+        //[HttpGet]
+        //[Route("application/{appGuid:Guid}")]
+        //Task<ServiceResponse<LibraryApplicationResponse>> GetApplication(Guid appGuid);
     }
 }

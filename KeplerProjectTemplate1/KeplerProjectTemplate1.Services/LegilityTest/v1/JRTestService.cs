@@ -1,25 +1,32 @@
 ﻿using KeplerProjectTemplate1.Interfaces.LegilityTest.v1;
 using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Exceptions;
+using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Logic;
 using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Models;
 using Relativity.API;
 using Relativity.API.Context;
+using Relativity.Audit.Services.Interfaces.V1.Metrics;
+using Relativity.Audit.Services.Interfaces.V1.Metrics.Models;
+using Relativity.Audit.Services.Interfaces.V1.ReviewerStatistics;
+using Relativity.Audit.Services.Interfaces.V1.ReviewerStatistics.Models;
 using Relativity.Environment.V1.LibraryApplication;
 using Relativity.Environment.V1.LibraryApplication.Models;
+using Relativity.Kepler.Exceptions;
 using Relativity.Kepler.Logging;
 using Relativity.Services.Exceptions;
 using System;
+using System.Text.Json;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-namespace KeplerProjectTemplate1.Services.LegilityTest.v1
+namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 {
     public class JRTestService : IJRTestService
     {
         private IHelper _helper;
         private ILog _logger;
         private const int ADMIN_WORKSPACE_ID = -1;
-
+        public const string ISO8601_FORMAT = "yyyy-MM-ddTHH:mm:sszzz";
 
         // Note: IHelper and ILog are dependency injected into the constructor every time the service is called.
         public JRTestService(IHelper helper, ILog logger)
@@ -140,54 +147,103 @@ namespace KeplerProjectTemplate1.Services.LegilityTest.v1
         }
 
 
-        public async Task<ServiceResponse<List<LibraryApplicationResponse>>> GetApplications()
+        public async Task<ServiceResponse<List<string>>> GetApplications()
         {
-            ServiceResponse<List<LibraryApplicationResponse>> serviceResponse = new ServiceResponse<List<LibraryApplicationResponse>>();
-            using (ILibraryApplicationManager libraryApplicationManager = _helper.GetServicesManager().CreateProxy<ILibraryApplicationManager>(ExecutionIdentity.System))
+            ServiceResponse<List<string>> serviceResponse = new ServiceResponse<List<string>>();
+            serviceResponse.Message = "success";
+            return serviceResponse;
+            //using (ILibraryApplicationManager libraryApplicationManager = _helper.GetServicesManager().CreateProxy<ILibraryApplicationManager>(ExecutionIdentity.System))
+            //{
+                
+            //    return await LibraryApplicationAPI.ReadAll(libraryApplicationManager);
+
+            //}
+        }
+
+        public async Task<ServiceResponse<List<AuditMetricsAggregateResponse>>> GetAuditsForWorkspace(int workspaceID)
+        {
+            ServiceResponse<List<AuditMetricsAggregateResponse>> service = new ServiceResponse<List<AuditMetricsAggregateResponse>>();
+            service.Data = new List<AuditMetricsAggregateResponse>();
+            using (IAuditMetricsService auditMetricsService = _helper.GetServicesManager().CreateProxy<IAuditMetricsService>(ExecutionIdentity.System))
             {
                 try
                 {
-                    List<LibraryApplicationResponse> response = await libraryApplicationManager.ReadAllAsync(ADMIN_WORKSPACE_ID, false, false);
-                    serviceResponse.Data = response;
-                    string info = string.Format($"{response.Count} Library Applications were successfully read.");
-                    serviceResponse.Message = info;
-
+                    AuditMetricsAggregateResponse workspaceMetrics = await auditMetricsService.GetWorkspaceAuditMetricsAsync(workspaceID);
+                    service.Data.Add(workspaceMetrics);
+                    return service;
                 }
-                catch (Exception ex)
+                catch(ServiceNotFoundException snfe)
                 {
-                    serviceResponse.Exception = ex;
-                    serviceResponse.Message = $"An error occurred: {ex.Message}";
-
-                    serviceResponse.Success = false;
-
+                    service.Exception = snfe;
+                    service.Message = "ServiceNotInstalled";
+                    service.Success = true;
+                    service.StatusCode = 404;
                 }
-                return serviceResponse;
+                catch(Exception ex)
+                {
+                    service.Exception = ex;
+                    service.Message = "GetWorkspacAudit Failed";
+                    service.Success = false;
+                    service.StatusCode = 500;
+                }
             }
+            return service;
         }
 
-        public async Task<ServiceResponse<LibraryApplicationResponse>> GetApplication(Guid appGuid)
+
+
+        public async Task<string> GetElasticSearchReviewerStatistics(long workspaceId, DateTime lastAuditActivity)
         {
-            ServiceResponse<LibraryApplicationResponse> serviceResponse = new ServiceResponse<LibraryApplicationResponse>();
-            using (ILibraryApplicationManager libraryApplicationManager = _helper.GetServicesManager().CreateProxy<ILibraryApplicationManager>(ExecutionIdentity.System))
+            DateTime lastDbActivity = await GetLastAuditTimeFromApi((int)workspaceId);
+            if (DateTime.Compare(lastDbActivity, lastAuditActivity) > 0)
             {
-                try
-                {
-                    LibraryApplicationResponse response = await libraryApplicationManager.ReadAsync(ADMIN_WORKSPACE_ID, appGuid);
-                    serviceResponse.Data = response;
-                    serviceResponse.Message = string.Format($"Library Application successfully read. {response.Name} exists");
-                    return serviceResponse;
-                }
-                catch (Exception ex)
-                {
-                    serviceResponse.Exception = ex;
-                    serviceResponse.Message = $"An error occurred: {ex.Message}";
+                IEnumerable<ReviewersStats> revStats = await GetReviewerStatisticsFromApi(workspaceId);
 
-                    serviceResponse.Success = false;
-                }
-                return serviceResponse;
+                string userStatsJson = PackageRevStats(revStats);
+
+                return userStatsJson;
+
             }
+            return null;
         }
 
+        private string PackageRevStats(IEnumerable<ReviewersStats> toJson)
+        {
+            return JsonSerializer.Serialize<IEnumerable<ReviewersStats>>(toJson);
+        }
+
+        private async Task<DateTime> GetLastAuditTimeFromApi(int workspaceId)
+        { //TODO: figure out how to query the last audit time
+            throw new NotImplementedException();
+
+        }
+
+        private async Task<IEnumerable<ReviewersStats>> GetReviewerStatisticsFromApi(long workspaceId)
+        {
+            DateTimeOffset localOffset = new DateTimeOffset(DateTime.Now);
+            DateTime endOfLastHour = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0, DateTimeKind.Utc);
+
+            using (var reviewerStats = _helper.GetServicesManager().CreateProxy<IAuditReviewerStatisticsService>(ExecutionIdentity.CurrentUser))
+            {
+                ReviewerStatsDataRequest request = new ReviewerStatsDataRequest
+                {
+                    StartDate = endOfLastHour.AddHours(-1).ToString(ISO8601_FORMAT),
+                    EndDate = endOfLastHour.ToString(ISO8601_FORMAT),
+                    TimeZone = localOffset.Offset.TotalHours,
+                    NonAdmin = false,
+                    AdditionalActions = "Mass Edit and Propagation"
+                };
+
+                IEnumerable<ReviewersStats> reviewerMetrics = await reviewerStats.GetReviewerStatsAsync((int)workspaceId, request);
+
+
+
+                return reviewerMetrics;
+
+
+            }
+
+        }
 
 
         /// <summary>
