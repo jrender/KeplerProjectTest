@@ -18,6 +18,9 @@ using System.Text.Json;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using Relativity.Audit.Services.Interfaces.V1.UI;
+using Relativity.Audit.Services.Interfaces.V1.UI.Models;
+using Relativity.Audit.Services.Interfaces.V1.DataContracts;
 
 namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 {
@@ -190,6 +193,45 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
             return service;
         }
 
+        public async Task<ServiceResponse<string>> GetLastAuditIdForWorkspace(int workspaceID)
+        {
+            ServiceResponse<string> serviceResponse = new ServiceResponse<string>();
+            try
+            {
+                using (var auditObjectManager = _helper.GetServicesManager().CreateProxy<IAuditObjectManagerUIService>(ExecutionIdentity.System))
+                {
+                    var request = new QueryRequest
+                    {
+                        Fields = new List<FieldRef>
+                        {
+                            new FieldRef{Name = "Audit ID"}
+                        },
+                        Condition = "",
+                        RowCondition = "",
+                        Sorts = new List<Sort>
+                        {
+                            new Sort
+                            {
+                                Direction = SortEnum.Descending,
+                                FieldIdentifier = new FieldRef {Name = "Timestamp"} // Only support Timestamp and Execution Time (ms)
+                            }
+                        }
+                        
+                    };
+                    QueryResultSlim queryRequest = await auditObjectManager.QuerySlimAsync(workspaceID, request, 1, 1);
+
+                    serviceResponse.Data = JsonSerializer.Serialize<QueryResultSlim>(queryRequest);
+                }
+            }
+            catch(Exception ex)
+            {
+                serviceResponse.Exception = ex;
+                serviceResponse.Message = "GetWorkspacAudit Failed";
+                serviceResponse.Success = false;
+                serviceResponse.StatusCode = 500;
+            }
+            return serviceResponse;
+        }
 
 
         public async Task<string> GetElasticSearchReviewerStatistics(long workspaceId, DateTime lastAuditActivity)
