@@ -231,6 +231,13 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 
                 }
             }
+            catch (ServiceNotFoundException snfe)
+            {
+                serviceResponse.Exception = snfe;
+                serviceResponse.Message = "ServiceNotInstalled";
+                serviceResponse.Success = true;
+                serviceResponse.StatusCode = 404;
+            }
             catch (Exception ex)
             {
                 serviceResponse.Exception = ex;
