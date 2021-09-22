@@ -37,6 +37,7 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
             // Note: Set the logging context to the current class.
             _logger = logger.ForContext<JRTestService>();
             _helper = helper;
+
         }
 
         public async Task<JRTestServiceModel> GetWorkspaceNameAsync(int workspaceID)
@@ -204,7 +205,8 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                     {
                         Fields = new List<FieldRef>
                         {
-                            new FieldRef{Name = "Audit ID"}
+                            new FieldRef{Name = "Audit ID"},
+                            new FieldRef {Name = "Timestamp" }
                         },
                         Condition = "",
                         RowCondition = "",
@@ -216,14 +218,14 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                                 FieldIdentifier = new FieldRef {Name = "Timestamp"} // Only support Timestamp and Execution Time (ms)
                             }
                         }
-                        
+
                     };
                     QueryResultSlim queryRequest = await auditObjectManager.QuerySlimAsync(workspaceID, request, 1, 1);
 
                     serviceResponse.Data = JsonSerializer.Serialize<QueryResultSlim>(queryRequest);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 serviceResponse.Exception = ex;
                 serviceResponse.Message = "GetWorkspacAudit Failed";
