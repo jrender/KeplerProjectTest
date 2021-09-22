@@ -1,6 +1,4 @@
-﻿using KeplerProjectTemplate1.Interfaces.LegilityTest.v1;
-using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Exceptions;
-using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Logic;
+﻿using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Exceptions;
 using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Models;
 using Relativity.API;
 using Relativity.API.Context;
@@ -8,19 +6,17 @@ using Relativity.Audit.Services.Interfaces.V1.Metrics;
 using Relativity.Audit.Services.Interfaces.V1.Metrics.Models;
 using Relativity.Audit.Services.Interfaces.V1.ReviewerStatistics;
 using Relativity.Audit.Services.Interfaces.V1.ReviewerStatistics.Models;
-using Relativity.Environment.V1.LibraryApplication;
-using Relativity.Environment.V1.LibraryApplication.Models;
 using Relativity.Kepler.Exceptions;
 using Relativity.Kepler.Logging;
 using Relativity.Services.Exceptions;
 using System;
-using System.Text.Json;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Relativity.Audit.Services.Interfaces.V1.UI;
 using Relativity.Audit.Services.Interfaces.V1.UI.Models;
 using Relativity.Audit.Services.Interfaces.V1.DataContracts;
+using Newtonsoft.Json;
 
 namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 {
@@ -194,9 +190,9 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
             return service;
         }
 
-        public async Task<ServiceResponse<string>> GetLastAuditIdForWorkspace(int workspaceID)
+        public async Task<ServiceResponse<long>> GetLastAuditIdForWorkspace(int workspaceID)
         {
-            ServiceResponse<string> serviceResponse = new ServiceResponse<string>();
+            ServiceResponse<long> serviceResponse = new ServiceResponse<long>();
             try
             {
                 using (var auditObjectManager = _helper.GetServicesManager().CreateProxy<IAuditObjectManagerUIService>(ExecutionIdentity.System))
@@ -206,7 +202,6 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                         Fields = new List<FieldRef>
                         {
                             new FieldRef{Name = "Audit ID"},
-                            new FieldRef {Name = "Timestamp" }
                         },
                         Condition = "",
                         RowCondition = "",
@@ -220,9 +215,20 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                         }
 
                     };
-                    QueryResultSlim queryRequest = await auditObjectManager.QuerySlimAsync(workspaceID, request, 1, 1);
+                    QueryResultSlim queryRequest = await auditObjectManager.QuerySlimAsync(workspaceID, request, 0, 10);
+                    if (queryRequest != null && queryRequest.Objects.Count > 0)
+                    {
+                        RelativityObjectSlim relObject = queryRequest.Objects[0];
+                        if (relObject.Values.Count > 0)
+                        {
+                            string value = relObject.Values[0].ToString();
+                            long lastIdStr;
+                            Int64.TryParse(value.Replace(workspaceID.ToString(), "").Replace("-", ""), out lastIdStr);
+                            serviceResponse.Data = lastIdStr;
+                        }
+                    }
+                    
 
-                    serviceResponse.Data = JsonSerializer.Serialize<QueryResultSlim>(queryRequest);
                 }
             }
             catch (Exception ex)
@@ -253,7 +259,7 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 
         private string PackageRevStats(IEnumerable<ReviewersStats> toJson)
         {
-            return JsonSerializer.Serialize<IEnumerable<ReviewersStats>>(toJson);
+            return JsonConvert.SerializeObject(toJson);
         }
 
         private async Task<DateTime> GetLastAuditTimeFromApi(int workspaceId)

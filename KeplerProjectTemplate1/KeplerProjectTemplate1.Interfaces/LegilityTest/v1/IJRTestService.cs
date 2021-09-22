@@ -58,7 +58,7 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 
         [HttpGet]
         [Route("audit/query/{workspaceID:int}")]
-        Task<ServiceResponse<string>> GetLastAuditIdForWorkspace(int workspaceID);
+        Task<ServiceResponse<long>> GetLastAuditIdForWorkspace(int workspaceID);
 
         //[HttpGet]
         //[Route("application/{appGuid:Guid}")]
