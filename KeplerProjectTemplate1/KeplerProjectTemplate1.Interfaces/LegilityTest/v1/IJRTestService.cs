@@ -50,7 +50,7 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 
         [HttpGet]
         [Route("application")]
-        Task<ServiceResponse<List<string>>> GetApplications();
+        Task<ServiceResponse<List<LibraryApplicationResponse>>> GetApplications();
 
         [HttpGet]
         [Route("audit/{workspaceID:int}")]
@@ -60,8 +60,20 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
         [Route("audit/query/{workspaceID:int}")]
         Task<ServiceResponse<long>> GetLastAuditIdForWorkspace(int workspaceID);
 
+        [HttpPost]
+        [Route("audit/review")]
+        Task<string> GetElasticSearchReviewerStatistics(JRReviewModel reviewModel);
+
         //[HttpGet]
         //[Route("application/{appGuid:Guid}")]
         //Task<ServiceResponse<LibraryApplicationResponse>> GetApplication(Guid appGuid);
+
+        [HttpGet]
+        [Route("audit/lastTime/{workspaceId:int}")]
+        Task<ServiceResponse<DateTime>> GetLastAuditTimeFromApi(int workspaceId);
+
+        [HttpPost]
+        [Route("audit/reviewer/choices")]
+        Task<ServiceResponse<string>> GetReviewerChoices(int workspaceId, int[] fieldIds);
     }
 }

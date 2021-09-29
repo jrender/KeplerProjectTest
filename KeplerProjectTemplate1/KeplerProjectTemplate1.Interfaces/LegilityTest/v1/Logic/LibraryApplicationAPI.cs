@@ -29,21 +29,21 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Logic
         //        return serviceResponse;
         //    }
         //}
-        //public static async Task<ServiceResponse<List<LibraryApplicationResponse>>> ReadAll(ILibraryApplicationManager libraryApplicationManager)
-        //{
-        //    ServiceResponse<List<LibraryApplicationResponse>> serviceResponse = new ServiceResponse<List<LibraryApplicationResponse>>();
-        //    try
-        //    {
-        //        serviceResponse.Data = await libraryApplicationManager.ReadAllAsync(ADMIN_WORKSPACE_ID);
-        //        return serviceResponse;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        serviceResponse.Message = $"An error occurred: {ex.Message}";
-        //        serviceResponse.Exception = ex;
-        //        serviceResponse.Success = false;
-        //        return serviceResponse;
-        //    }
-        //}
+        public static async Task<ServiceResponse<List<LibraryApplicationResponse>>> ReadAll(ILibraryApplicationManager libraryApplicationManager)
+        {
+            ServiceResponse<List<LibraryApplicationResponse>> serviceResponse = new ServiceResponse<List<LibraryApplicationResponse>>();
+            try
+            {
+                serviceResponse.Data = await libraryApplicationManager.ReadAllAsync(ADMIN_WORKSPACE_ID);
+                return serviceResponse;
+            }
+            catch (Exception ex)
+            {
+                serviceResponse.Message = $"An error occurred: {ex.Message}";
+                serviceResponse.Exception = ex;
+                serviceResponse.Success = false;
+                return serviceResponse;
+            }
+        }
     }
 }

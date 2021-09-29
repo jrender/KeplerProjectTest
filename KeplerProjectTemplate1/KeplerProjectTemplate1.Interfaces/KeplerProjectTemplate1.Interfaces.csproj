@@ -74,6 +74,7 @@
     <Compile Include="LegilityTest\v1\IJRTestService.cs" />
     <Compile Include="LegilityTest\v1\Exceptions\JRTestServiceException.cs" />
     <Compile Include="LegilityTest\v1\Logic\LibraryApplicationAPI.cs" />
+    <Compile Include="LegilityTest\v1\Models\JRReviewModel.cs" />
     <Compile Include="LegilityTest\v1\Models\JRTestServiceModel.cs" />
     <Compile Include="LegilityTest\v1\Models\ServiceResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
