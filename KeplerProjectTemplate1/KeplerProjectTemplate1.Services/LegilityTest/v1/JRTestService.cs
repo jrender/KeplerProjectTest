@@ -2,11 +2,11 @@
 using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Models;
 using Relativity.API;
 using Relativity.API.Context;
-using Relativity.Audit.Services.Interfaces.V1.Metrics;
-using Relativity.Audit.Services.Interfaces.V1.Metrics.Models;
-using Relativity.Audit.Services.Interfaces.V1.ReviewerStatistics;
-using Relativity.Audit.Services.Interfaces.V1.ReviewerStatistics.Models;
-using Relativity.Environment.V1.LibraryApplication.Models;
+using Relativity.Audit.Services.Interface.Metrics;
+using Relativity.Audit.Services.Interface.Metrics.Models;
+using Relativity.Audit.Services.Interface.ReviewerStatistics;
+using Relativity.Audit.Services.Interface.ReviewerStatistics.Models;
+//using Relativity.Environment.V1.LibraryApplication.Models;
 using Relativity.Kepler.Exceptions;
 using Relativity.Kepler.Logging;
 using Relativity.Services.Exceptions;
@@ -14,15 +14,16 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Relativity.Audit.Services.Interfaces.V1.UI;
-using Relativity.Audit.Services.Interfaces.V1.UI.Models;
-using Relativity.Audit.Services.Interfaces.V1.DataContracts;
+using Relativity.Audit.Services.Interface.UI.Models;
+using Relativity.Audit.Services.Interface.DataContracts;
 using Newtonsoft.Json;
-using Relativity.Audit.Services.Interfaces.V1.Pivot;
+using Relativity.Audit.Services.Interface.Pivot;
 using System.Threading;
-using Relativity.Audit.Services.Interfaces.V1.Pivot.Models;
+using Relativity.Audit.Services.Interface.Pivot.Models;
 using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Logic;
-using Relativity.Environment.V1.LibraryApplication;
+using Relativity.Audit.Services.Interface.Query;
+using Relativity.Services.Objects.DataContracts;
+//using Relativity.Environment.V1.LibraryApplication;
 
 namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 {
@@ -153,18 +154,18 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
         }
 
 
-        public async Task<ServiceResponse<List<LibraryApplicationResponse>>> GetApplications()
-        {
-            ServiceResponse<List<LibraryApplicationResponse>> serviceResponse = new ServiceResponse<List<LibraryApplicationResponse>>();
-            serviceResponse.Message = "success";
+        //public async Task<ServiceResponse<List<LibraryApplicationResponse>>> GetApplications()
+        //{
+        //    ServiceResponse<List<LibraryApplicationResponse>> serviceResponse = new ServiceResponse<List<LibraryApplicationResponse>>();
+        //    serviceResponse.Message = "success";
 
-            using (ILibraryApplicationManager libraryApplicationManager = _helper.GetServicesManager().CreateProxy<ILibraryApplicationManager>(ExecutionIdentity.System))
-            {
+        //    using (ILibraryApplicationManager libraryApplicationManager = _helper.GetServicesManager().CreateProxy<ILibraryApplicationManager>(ExecutionIdentity.System))
+        //    {
 
-                return await LibraryApplicationAPI.ReadAll(libraryApplicationManager);
+        //        return await LibraryApplicationAPI.ReadAll(libraryApplicationManager);
 
-            }
-        }
+        //    }
+        //}
 
         public async Task<ServiceResponse<List<AuditMetricsAggregateResponse>>> GetAuditsForWorkspace(int workspaceID)
         {
@@ -181,7 +182,7 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                 catch(ServiceNotFoundException snfe)
                 {
                     service.Exception = snfe;
-                    service.Message = "ServiceNotInstalled";
+                    service.Message = "GetAuditsForWorkspace: ServiceNotInstalled";
                     service.Success = true;
                     service.StatusCode = 404;
                 }
@@ -205,9 +206,9 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                 {
                     var request = new QueryRequest
                     {
-                        Fields = new List<Relativity.Audit.Services.Interfaces.V1.DataContracts.FieldRef>
+                        Fields = new List<FieldRef>
                         {
-                            new Relativity.Audit.Services.Interfaces.V1.DataContracts.FieldRef{Name = "Audit ID"},
+                            new FieldRef{Name = "Audit ID"},
                         },
                         Condition = "",
                         RowCondition = "",
@@ -216,7 +217,7 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                             new Sort
                             {
                                 Direction = SortEnum.Descending,
-                                FieldIdentifier = new Relativity.Audit.Services.Interfaces.V1.DataContracts.FieldRef {Name = "Timestamp"} // Only support Timestamp and Execution Time (ms)
+                                FieldIdentifier = new FieldRef {Name = "Timestamp"} // Only support Timestamp and Execution Time (ms)
                             }
                         }
 
@@ -257,48 +258,49 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 
         public async Task<string> GetElasticSearchReviewerStatistics(JRReviewModel reviewModel)
         {
-            DateTime lastAuditActivity = DateTime.Now.AddDays(-1);
-            ServiceResponse<DateTime> srDt = await GetLastAuditTimeFromApi(reviewModel.WorkspaceId);
-            DateTime lastDbActivity = srDt.Data;
-            if (DateTime.Compare(lastDbActivity, lastAuditActivity) > 0)
-            {
-                List<ReviewersStats> revStats = (List<ReviewersStats>) await GetReviewerStatisticsFromApi(reviewModel.WorkspaceId, reviewModel.AdditionalActions);
-                DateTime now = DateTime.Now;
-                List<ReviewerStatistic> outboundStatistics = new List<ReviewerStatistic>();
-                if (revStats.Count > 0)
-                {
-                    foreach (ReviewersStats revstats in revStats)
-                    {
-                        if (revstats.UserID == 777)
-                        {
-                            continue;
-                        }
+            //DateTime lastAuditActivity = DateTime.Now.AddDays(-1);
+            //ServiceResponse<DateTime> srDt = await GetLastAuditTimeFromApi(reviewModel.WorkspaceId);
+            //DateTime lastDbActivity = srDt.Data;
+            //if (DateTime.Compare(lastDbActivity, lastAuditActivity) > 0)
+            //{
+            //    List<ReviewersStats> revStats = (List<ReviewersStats>) await GetReviewerStatisticsFromApi(reviewModel.WorkspaceId, reviewModel.AdditionalActions);
+            //    DateTime now = DateTime.Now;
+            //    List<ReviewerStatistic> outboundStatistics = new List<ReviewerStatistic>();
+            //    if (revStats.Count > 0)
+            //    {
+            //        foreach (ReviewersStats revstats in revStats)
+            //        {
+            //            if (revstats.UserId == 777)
+            //            {
+            //                continue;
+            //            }
 
-                        ReviewerStatistic outBoundStat = new ReviewerStatistic()
-                        {
-                            WorkspaceId = reviewModel.WorkspaceId,
-                            UserId = revstats.UserID,
-                            ModDate = now,
-                            TotalTime = revstats.TotalUsageTime,
-                            Views = revstats.Views,
-                            Edits = revstats.Edits,
-                            MassEdits = revstats.MassEdits ?? 0,
-                            Propagations = revstats.Propagations ?? 0,
-                            TotalTimeDecimal = Math.Round((decimal)TimeSpan.Parse(revstats.TotalUsageTime).TotalMinutes, 6)
-                        };
-                        outboundStatistics.Add(outBoundStat);
+            //            ReviewerStatistic outBoundStat = new ReviewerStatistic()
+            //            {
+            //                WorkspaceId = reviewModel.WorkspaceId,
+            //                UserId = revstats.UserId,
+            //                ModDate = now,
+            //                TotalTime = revstats.TotalUsageTime,
+            //                Views = revstats.Views,
+            //                Edits = revstats.Edits,
+            //                MassEdits = revstats.MassEdits ?? 0,
+            //                Propagations = revstats.Propagations ?? 0,
+            //                TotalTimeDecimal = Math.Round((decimal)TimeSpan.Parse(revstats.TotalUsageTime).TotalMinutes, 6)
+            //            };
+            //            outboundStatistics.Add(outBoundStat);
 
-                    }
-                }
+            //        }
+            //    }
 
 
 
-                string userStatsJson = PackageRevStats(outboundStatistics);
+            //    string userStatsJson = PackageRevStats(outboundStatistics);
 
-                return userStatsJson;
+            //    return userStatsJson;
 
-            }
-            return null;
+            //}
+            //return null;
+            return "not implemented in Relativity server2021";
         }
 
         private string PackageRevStats(List<ReviewerStatistic> toJson)
@@ -315,9 +317,9 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                 {
                     var request = new QueryRequest
                     {
-                        Fields = new List<Relativity.Audit.Services.Interfaces.V1.DataContracts.FieldRef>
+                        Fields = new List<FieldRef>
                         {
-                            new Relativity.Audit.Services.Interfaces.V1.DataContracts.FieldRef{Name = "Timestamp"},
+                            new FieldRef{Name = "Timestamp"},
                         },
                         Condition = "",
                         RowCondition = "",
@@ -326,7 +328,7 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
                             new Sort
                             {
                                 Direction = SortEnum.Descending,
-                                FieldIdentifier = new Relativity.Audit.Services.Interfaces.V1.DataContracts.FieldRef {Name = "Timestamp"} // Only support Timestamp and Execution Time (ms)
+                                FieldIdentifier = new FieldRef {Name = "Timestamp"} // Only support Timestamp and Execution Time (ms)
                             }
                         }
 
@@ -364,114 +366,115 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 
         }
 
-        private async Task<IEnumerable<ReviewersStats>> GetReviewerStatisticsFromApi(int workspaceId, string additionalActions)
-        {
-            DateTimeOffset localOffset = new DateTimeOffset(DateTime.Now);
-            DateTime endOfLastHour = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0, DateTimeKind.Utc);
+        //private async Task<IEnumerable<ReviewersStats>> GetReviewerStatisticsFromApi(int workspaceId, string additionalActions)
+        //{
+        //    DateTimeOffset localOffset = new DateTimeOffset(DateTime.Now);
+        //    DateTime endOfLastHour = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0, DateTimeKind.Utc);
 
-            using (var reviewerStats = _helper.GetServicesManager().CreateProxy<IAuditReviewerStatisticsService>(ExecutionIdentity.CurrentUser))
-            {
-                ReviewerStatsDataRequest request = new ReviewerStatsDataRequest
-                {
-                    StartDate = endOfLastHour.AddHours(-1).ToString(ISO8601_FORMAT),
-                    EndDate = endOfLastHour.ToString(ISO8601_FORMAT),
-                    TimeZone = localOffset.Offset.TotalHours,
-                    NonAdmin = false,
-                    AdditionalActions = additionalActions
-                };
+        //    using (var reviewerStats = _helper.GetServicesManager().CreateProxy<IAuditReviewerStatisticsService>(ExecutionIdentity.CurrentUser))
+        //    {
+        //        ReviewerStatsDataRequest request = new ReviewerStatsDataRequest
+        //        {
+        //            StartDate = endOfLastHour.AddHours(-1).ToString(ISO8601_FORMAT),
+        //            EndDate = endOfLastHour.ToString(ISO8601_FORMAT),
+        //            TimeZone = localOffset.Offset.TotalHours,
+        //            NonAdmin = false,
+        //            AdditionalActions = additionalActions
+        //        };
 
-                IEnumerable<ReviewersStats> reviewerMetrics = await  reviewerStats.GetReviewerStatsAsync(workspaceId, request);
+        //        IEnumerable<ReviewersStats> reviewerMetrics = await  reviewerStats.GetReviewerStatsAsync(workspaceId, request);
                 
 
-                return reviewerMetrics;
+        //        return reviewerMetrics;
 
 
-            }
+        //    }
 
-        }
+        //}
 
         public async Task<ServiceResponse<string>> GetReviewerChoices(int workspaceId, int[] fieldIds)
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
-            try
-            {
+            //try
+            //{
 
-                using (var reviewerStats = _helper.GetServicesManager().CreateProxy<IAuditReviewerStatisticsService>(ExecutionIdentity.System))
-                {
-                    var request = new ReviewerChoicesCriteria
-                    {
-                        FieldIDs = fieldIds,
-                        UserIdsToExcludeInReport = new int[] { 777 },
-                        StartDate = new DateTimeOffset(DateTime.Now.AddDays(-5)),
-                        EndDate = new DateTimeOffset(DateTime.Now),
-                        TimeZone = "America/Chicago",
-                    };
+            //    using (var reviewerStats = _helper.GetServicesManager().CreateProxy<IAuditReviewerStatisticsService>(ExecutionIdentity.System))
+            //    {
+            //        var request = new ReviewerChoicesCriteria
+            //        {
+            //            FieldIDs = fieldIds,
+            //            UserIdsToExcludeInReport = new int[] { 777 },
+            //            StartDate = new DateTimeOffset(DateTime.Now.AddDays(-5)),
+            //            EndDate = new DateTimeOffset(DateTime.Now),
+            //            TimeZone = "America/Chicago",
+            //        };
 
-                    ReviewedFieldChoicesPerUserResponse reviewerChoice = await reviewerStats.GetReviewerChoicesAsync(workspaceId, request);
-                    response.Data = JsonConvert.SerializeObject(reviewerChoice);
+            //        ReviewedFieldChoicesPerUserResponse reviewerChoice = await reviewerStats.GetReviewerChoicesAsync(workspaceId, request);
+            //        response.Data = JsonConvert.SerializeObject(reviewerChoice);
 
-                }
+            //    }
 
-            }
-            catch(ServiceNotFoundException snfe)
-            {
-                response.Message = snfe.Message;
-                response.Exception = snfe;
-            }
-            catch(Exception ex)
-            {
-                response.Exception = ex;
-                response.Message = ex.Message;
-            }
+            //}
+            //catch(ServiceNotFoundException snfe)
+            //{
+            //    response.Message = snfe.Message;
+            //    response.Exception = snfe;
+            //}
+            //catch(Exception ex)
+            //{
+            //    response.Exception = ex;
+            //    response.Message = ex.Message;
+            //}
+            response.Data = "Not implemented in Relativity Server2021";
             return response;
         }
 
-        public async Task<ServiceResponse<string>> GetPivotQuery(int workspaceId)
-        {
-            ServiceResponse<string> response = new ServiceResponse<string>();
-            try
-            {
+        //public async Task<ServiceResponse<string>> GetPivotQuery(int workspaceId)
+        //{
+        //    ServiceResponse<string> response = new ServiceResponse<string>();
+        //    try
+        //    {
 
             
-                using (var pivotService = _helper.GetServicesManager().CreateProxy<IAuditPivotService>(ExecutionIdentity.System))
-                {
-                    var cancellationToken = new CancellationToken(); // required but not supported
-                    var progressToken = new Progress<string>(); // required but not supported
-                    var settings = new PivotSettings
-                    {
-                        // Field Artifact ID
-                        GroupBy = new Relativity.Audit.Services.Interfaces.V1.Pivot.Models.FieldRef { Name = "Timestamp" },
-                        PivotOn = new Relativity.Audit.Services.Interfaces.V1.Pivot.Models.FieldRef(1039646),
-                        ObjectSetQuery = new Query
-                        {
-                            // Filter conditions
-                            Condition = "(('Object Type' == CHOICE 1048471))",
-                            RowCondition = ""
-                        },
-                        ConvertNumberFieldValuesToString = true,
-                        MaximumNumberOfColumns = 10,
+        //        using (var pivotService = _helper.GetServicesManager().CreateProxy<IAuditPivotService>(ExecutionIdentity.System))
+        //        {
+        //            var cancellationToken = new CancellationToken(); // required but not supported
+        //            var progressToken = new Progress<string>(); // required but not supported
+        //            var settings = new PivotSettings
+        //            {
+        //                // Field Artifact ID
+        //                GroupBy = new Relativity.Audit.Services.Interfaces.V1.Pivot.Models.FieldRef { Name = "Timestamp" },
+        //                PivotOn = new Relativity.Audit.Services.Interfaces.V1.Pivot.Models.FieldRef(1039646),
+        //                ObjectSetQuery = new Query
+        //                {
+        //                    // Filter conditions
+        //                    Condition = "(('Object Type' == CHOICE 1048471))",
+        //                    RowCondition = ""
+        //                },
+        //                ConvertNumberFieldValuesToString = true,
+        //                MaximumNumberOfColumns = 10,
 
-                        Timeout = 30,
-                        RawDataOnly = false,
-                        TimeZone = "America/Chicago"
-                    };
-                    Console.WriteLine(JsonConvert.SerializeObject(settings));
-                    PivotResultSet pivotResponse = await pivotService.PivotAsync(workspaceId, settings, cancellationToken, progressToken);
-                    response.Data = JsonConvert.SerializeObject(pivotResponse);
-                }
-            }
-            catch (ServiceNotFoundException snfe)
-            {
-                response.Message = snfe.Message;
-                response.Exception = snfe;
-            }
-            catch (Exception ex)
-            {
-                response.Exception = ex;
-                response.Message = ex.Message;
-            }
-            return response;
-        }
+        //                Timeout = 30,
+        //                RawDataOnly = false,
+        //                TimeZone = "America/Chicago"
+        //            };
+        //            Console.WriteLine(JsonConvert.SerializeObject(settings));
+        //            PivotResultSet pivotResponse = await pivotService.PivotAsync(workspaceId, settings, cancellationToken, progressToken);
+        //            response.Data = JsonConvert.SerializeObject(pivotResponse);
+        //        }
+        //    }
+        //    catch (ServiceNotFoundException snfe)
+        //    {
+        //        response.Message = snfe.Message;
+        //        response.Exception = snfe;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.Exception = ex;
+        //        response.Message = ex.Message;
+        //    }
+        //    return response;
+        //}
         public struct ReviewerStatistic
         {
             public int WorkspaceId { get; set; }

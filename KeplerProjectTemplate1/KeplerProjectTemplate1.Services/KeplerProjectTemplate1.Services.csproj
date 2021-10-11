@@ -37,8 +37,8 @@
     <Reference Include="Relativity.API, Version=10.3.191.8, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Relativity.Api.10.3.191.8\lib\net462\Relativity.API.dll</HintPath>
     </Reference>
-    <Reference Include="Relativity.Audit.Services.Interfaces, Version=18.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Relativity.Audit.Services.SDK.18.0.1\lib\net462\Relativity.Audit.Services.Interfaces.dll</HintPath>
+    <Reference Include="Relativity.Audit.Services.Interface, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Relativity.Audit.Services.SDK.17.2.3\lib\net462\Relativity.Audit.Services.Interface.dll</HintPath>
     </Reference>
     <Reference Include="Relativity.Environment, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Relativity.Environment.SDK.2.0.2\lib\net462\Relativity.Environment.dll</HintPath>

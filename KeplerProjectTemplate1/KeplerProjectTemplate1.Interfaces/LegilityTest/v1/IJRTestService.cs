@@ -1,10 +1,10 @@
 ﻿using KeplerProjectTemplate1.Interfaces.LegilityTest.v1.Models;
 using Relativity.Kepler.Services;
-using Relativity.Environment.V1.LibraryApplication.Models;
+//using Relativity.Environment.V1.LibraryApplication.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Relativity.Audit.Services.Interfaces.V1.Metrics.Models;
+using Relativity.Audit.Services.Interface.Metrics.Models;
 
 namespace KeplerProjectTemplate1.Interfaces.LegilityTest
 {
@@ -48,9 +48,9 @@ namespace KeplerProjectTemplate1.Interfaces.LegilityTest
         [Route("workspace?{limit}")]
         Task<List<JRTestServiceModel>> QueryWorkspaceByNameAsync(string queryString, int limit = 10);
 
-        [HttpGet]
-        [Route("application")]
-        Task<ServiceResponse<List<LibraryApplicationResponse>>> GetApplications();
+        //[HttpGet]
+        //[Route("application")]
+        //Task<ServiceResponse<List<LibraryApplicationResponse>>> GetApplications();
 
         [HttpGet]
         [Route("audit/{workspaceID:int}")]
