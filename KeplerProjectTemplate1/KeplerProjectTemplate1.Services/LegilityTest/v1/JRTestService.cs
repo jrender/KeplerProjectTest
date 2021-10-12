@@ -14,8 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Relativity.Audit.Services.Interface.UI.Models;
-using Relativity.Audit.Services.Interface.DataContracts;
+
 using Newtonsoft.Json;
 using Relativity.Audit.Services.Interface.Pivot;
 using System.Threading;
